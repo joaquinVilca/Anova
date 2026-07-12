@@ -18,15 +18,29 @@ def construir(x, grado):
     X = []
     for xi in x:
         fila = []
-        for p in range(1, grado + 1):
-            fila.append(float(xi) ** p)
+        if isinstance(xi, list):
+            for p in range(1, grado + 1):
+                for v in xi:
+                    fila.append(float(v) ** p)
+        else:
+            for p in range(1, grado + 1):
+                fila.append(float(xi) ** p)
         X.append(fila)
     return X
 
-def etiquetas_pol(grado):
+def etiquetas_pol(grado, num_vars=1):
     # Genera las etiquetas legibles de cada coeficiente:
     # b0 (intercepto), x, x^2, x^3, ..., x^k
-    et = ["b0", "x"]
-    for p in range(2, grado + 1):
-        et.append("x^" + str(p))
+    et = ["b0"]
+    if num_vars == 1:
+        et.append("x")
+        for p in range(2, grado + 1):
+            et.append("x^" + str(p))
+    else:
+        for p in range(1, grado + 1):
+            for v in range(1, num_vars + 1):
+                if p == 1:
+                    et.append("x" + str(v))
+                else:
+                    et.append("x" + str(v) + "^" + str(p))
     return et

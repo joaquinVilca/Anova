@@ -23,8 +23,9 @@ def etiquetas_mlr(resultado):
 
 def obtener_etiquetas(resultado, tipo):
     if tipo == "pol":
-        grado = resultado["p"] - 1   # p incluye b0
-        return vandermonde.etiquetas_pol(grado)
+        num_vars = resultado.get("num_vars", 1)
+        grado = (resultado["p"] - 1) // num_vars
+        return vandermonde.etiquetas_pol(grado, num_vars)
     return etiquetas_mlr(resultado)
 
 def mostrar_coeficientes(resultado, tipo):
@@ -62,17 +63,17 @@ def construir(resultado, tipo="mlr"):
     p = len(et)
     K = []
     m = []
-    q = int(input("Num. restricciones (q): "))
+    q = int(input("Num. restricciones (q): \n"))
     for r in range(q):
         print("--Restriccion " + str(r+1) + " de " + str(q) + "--")
         fila = [0.0] * p
-        t = int(input("Cuantos coef. intervienen: "))
+        t = int(input("Cuantos coef. intervienen: \n"))
         for j in range(t):
-            idx = int(input(" indice (1-" + str(p) + "): ")) - 1
-            txt = input(" multiplicador (ENTER=1): ")
+            idx = int(input(" indice (1-" + str(p) + "): \n")) - 1
+            txt = input(" multiplicador (ENTER=1): \n")
             mult = 1.0 if txt.strip() == "" else float(txt)
             fila[idx] = mult
-        mv = float(input(" valor m: "))
+        mv = float(input(" valor m:  \n"))
         K.append(fila)
         m.append(mv)
     print("H0:")

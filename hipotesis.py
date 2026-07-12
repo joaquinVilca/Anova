@@ -20,7 +20,10 @@ def prueba(K, m, resultado):
     M = matriz.multiplicar(A, Kt)
 
     if q == 1:
-        Minv = [[1.0 / M[0][0]]]
+        if M[0][0] == 0.0:
+            Minv = [[0.0]]
+        else:
+            Minv = [[1.0 / M[0][0]]]
     else:
         Minv = inversa.invertir(M)
 
