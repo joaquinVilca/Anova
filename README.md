@@ -1,46 +1,58 @@
-# ANOVA y Regresión en Python (MicroPython Compatible)
+# Suite de Regresión y ANOVA sin Numpy
 
-Este repositorio contiene un conjunto de scripts en Python para realizar Análisis de Varianza (ANOVA) y modelos de regresión (Lineal Múltiple y Polinomial). 
+Esta es una colección de herramientas implementadas **100% en Python puro** (sin usar `numpy`, `scipy` ni otras bibliotecas externas) para resolver problemas de Regresión Lineal Simple, Múltiple y Polinomial, además de realizar Análisis de Varianza (ANOVA). 
 
-**Característica Principal:** Todo el código está escrito desde cero utilizando las estructuras de datos nativas de Python (listas). **No utiliza bibliotecas externas como `numpy`, `scipy`, `sklearn` o `statsmodels`.** Esto hace que los scripts sean ideales para ejecutarse en entornos con memoria limitada o en plataformas que ejecutan MicroPython, como calculadoras gráficas científicas (por ejemplo, la serie Casio fx-CG50 o fx-CG100).
+Es ideal para ejecutarse en entornos limitados como calculadoras gráficas programables (ej. Casio CG50/CG100 con MicroPython) o para fines netamente didácticos.
 
-## Características
+## Estructura de Scripts Principales
 
-* **Operaciones Matriciales Nativas:** Implementación propia de operaciones básicas de matrices (multiplicación, transposición, inversión, etc.) en `matriz.py` e `inversa.py`.
-* **Regresión Lineal Múltiple (MLR):** Ajuste de modelos con múltiples variables predictoras (`principal_mlr.py`).
-* **Regresión Polinomial:** Ajuste de curvas polinomiales de cualquier grado, con análisis de sumas de cuadrados secuenciales (`principal_pol.py`).
-* **Tabla ANOVA:** Cálculo y visualización de la tabla de Análisis de Varianza global para evaluar la significancia del modelo general.
-* **Pruebas de Hipótesis Estructurales:** Permite probar hipótesis sobre los coeficientes del modelo ($H_0: K\beta = m$) para tomar decisiones sobre las variables.
-* **Distribución F de Fisher:** Cálculo de valores críticos integrados localmente en `tabla_f.py` sin depender de módulos estadísticos de la biblioteca estándar de sistemas de escritorio.
+El proyecto se divide en tres *scripts* principales, cada uno diseñado para un caso de uso específico dependiendo de los datos que tengas disponibles:
 
-## Estructura del Código
+### 1. `1_rpoli.py` - Regresión Polinomial
+**¿Cuándo usarlo?**
+Úsalo cuando tengas datos crudos de **una sola variable independiente** ($X$) y quieras ajustarla a un modelo curvo (polinomial). Por ejemplo, un modelo de la forma:
+$\hat{Y} = \beta_0 + \beta_1 X + \beta_2 X^2 + \beta_3 X^3$
 
-* `principal_mlr.py` y `principal_pol.py`: **Puntos de entrada del programa** (interfaces interactivas CLI).
-* `modelo.py`: Lógica matemática central que ajusta el modelo lineal generalizado resolviendo las ecuaciones normales ($X^T X \beta = X^T y$).
-* `anova.py`: Módulo que resume los resultados (Suma de Cuadrados, Cuadrados Medios, estadístico F).
-* `hipotesis.py` y `constructor.py`: Facilitan la creación de pruebas de hipótesis $K\beta=m$ personalizadas o guiadas.
-* `matriz.py` e `inversa.py`: Álgebra matricial en Python puro (inversión mediante eliminación de Gauss-Jordan).
-* `vandermonde.py`: Generador de matriz de diseño (Vandermonde) requerida para la regresión polinomial.
-* `util_datos.py`: Helper para gestionar el ingreso de matrices de datos del usuario o datos de ejemplo predeterminados.
+**¿Qué hace?**
+- Toma el vector $X$ y el vector $Y$.
+- Calcula automáticamente los grados superiores ($X^2, X^3 \dots$) utilizando la matriz de Vandermonde.
+- Realiza la estimación de los coeficientes $\beta$.
+- Muestra la tabla ANOVA y calcula el coeficiente de determinación ($R^2$).
 
-## Cómo usar
+---
 
-1. Clona o descarga el repositorio en tu dispositivo o computadora.
-2. Abre tu terminal.
-3. Ejecuta el módulo de regresión que necesites:
+### 2. `2_rmultiple.py` - Regresión Lineal Múltiple (Datos Crudos)
+**¿Cuándo usarlo?**
+Úsalo cuando un problema te proporciona **la tabla completa de datos originales** (observaciones individuales para $X_1, X_2, \dots, X_p$ y $Y$).
 
-**Regresión Lineal Múltiple:**
-```bash
-python principal_mlr.py
-```
+**¿Qué hace?**
+- Permite ingresar la matriz de variables independientes y el vector de respuestas.
+- Ensambla internamente la matriz $X$ (añadiendo la columna de unos para el intercepto).
+- Calcula automáticamente $X^T X$ y su inversa.
+- Evalúa la significancia general del modelo mediante la tabla ANOVA y entrega los $\beta$.
+- Soporta la prueba de hipótesis lineal general.
 
-**Regresión Polinomial:**
-```bash
-python principal_pol.py
-```
+---
 
-El programa te guiará con un menú interactivo. Por defecto incluye datos de ejemplo ("datos quemados") para que puedas probar el programa inmediatamente oprimiendo 1 en las primeras opciones.
+### 3. `3_solver.py` - Solucionador Directo y Avanzado (Desde $X^TX$)
+**¿Cuándo usarlo?**
+Úsalo para exámenes o problemas avanzados donde **no tienes los datos crudos**, sino que te entregan directamente las matrices pre-calculadas: $X^T X$, $X^T Y$, y la suma total $Y^T Y$.
 
-## Licencia
+**¿Qué hace?**
+Este es el *script* más potente y modular. Utiliza un menú interactivo (`modulo_anova.py`) que te permite:
+1. **Ver la Tabla ANOVA Particionada:** Calcula las Sumas de Cuadrados (SS), Grados de Libertad (gl), Cuadrados Medios (CM) y Estadísticos F (para la media y la regresión ajustada) desde el origen no corregido.
+2. **Evaluar Contribución Individual (Pruebas T/F parciales):** Mide cuál variable aporta más al modelo en presencia de las demás y calcula su error estándar.
+3. **Probar Hipótesis Múltiple Personalizada:** Tiene un asistente interactivo que te permite probar restricciones lineales complejas (ej. $H_0: \beta_1 = \beta_2$ y $\beta_2 = \beta_3$) creando la matriz $K$ al vuelo.
+4. **Predecir e Intervalos:** Permite ingresar un nuevo vector $x_0$ para obtener la predicción puntual $\hat{Y}$, la varianza de la predicción, y el intervalo de confianza de la predicción al 95%.
 
-Este proyecto está abierto a su uso y modificación. Es un recurso excelente tanto para fines educativos (aprender el álgebra matricial detrás de los modelos predictivos) como para implementaciones prácticas en hardware incrustado.
+---
+
+## Módulos Internos (El Motor)
+Todos estos scripts se apoyan en módulos subyacentes escritos a mano:
+- **`matriz.py` / `inversa.py`:** Operaciones algebraicas básicas (producto punto, transpuesta, inversa por Gauss-Jordan).
+- **`tabla_f.py`:** Calculadora de valores críticos $F_{crit}$ de Fisher mediante interpolación y aproximaciones de distribución.
+- **`hipotesis.py` / `constructor.py`:** Motor para la hipótesis general lineal de la forma $K\beta = m$.
+- **`modulo_anova.py`:** Consolida toda la matemática profunda para `3_solver.py`.
+
+## Cómo Usarlo
+Descarga los archivos a tu calculadora o computadora. Si necesitas el solucionador, simplemente abre `3_solver.py`, edita directamente las variables `XtX`, `XtY`, `YtY` y `n` en la parte superior del archivo, guarda, y corre el script en la terminal para acceder al menú.
