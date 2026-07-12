@@ -51,16 +51,16 @@ def analizar_modelo(XtX, XtY, YtY, n):
     return resultado
 
 def imprimir_anova(res):
-    print('' + '='*50)
+    print('' + '=')
     print(' TABLA ANOVA PARTICIONADA (NO CORREGIDA)')
-    print('='*50)
+    print('=')
     print('Fuente       | SS         | gl | CM         | F')
-    print('-' * 50)
-    print('Media        |', round(res['SS_media'], 2), ' |', res['gl_media'], '|', round(res['CM_media'], 2), ' |', round(res['F_media'], 2))
-    print('Regr. Ajust. |', round(res['SCR_ajustada'], 2), '  |', res['gl_reg'], '|', round(res['CMR'], 2), '  |', round(res['F_reg'], 2))
-    print('Error        |', round(res['SCE'], 2), ' |', res['gl_err'], '|', round(res['CME'], 2), '  |')
-    print('Total NoCor. |', round(res['SCT_no_corregida'], 2), '  |', res['gl_tot'], '|            |')
-    print('='*50)
+    print('-' )
+    print('Media        | ' + str(round(res['SS_media'], 2)) + ' | ' + str(res['gl_media']) + ' | ' + str(round(res['CM_media'], 2)) + ' | ' + str(round(res['F_media'], 2)))
+    print('Regr. Ajust. | ' + str(round(res['SCR_ajustada'], 2)) + '  | ' + str(res['gl_reg']) + ' | ' + str(round(res['CMR'], 2)) + '  | ' + str(round(res['F_reg'], 2)))
+    print('Error        | ' + str(round(res['SCE'], 2)) + ' | ' + str(res['gl_err']) + ' | ' + str(round(res['CME'], 2)) + '  |')
+    print('Total NoCor. | ' + str(round(res['SCT_no_corregida'], 2)) + '  | ' + str(res['gl_tot']) + ' |            |')
+    print('=')
 
     f_crit_reg = tabla_f.f_critico(res['gl_reg'], res['gl_err'], 0.05)
     f_crit_media = tabla_f.f_critico(res['gl_media'], res['gl_err'], 0.05)
@@ -71,23 +71,23 @@ def imprimir_anova(res):
     print('   H0:', h0_reg)
 
     if res['F_reg'] < f_crit_reg:
-        print('   F_calc =', round(res['F_reg'], 2), '< F_crit(' + str(round(f_crit_reg, 2)) + ') -> NO SE RECHAZA H0.')
+        print('   F_calc = ' + str(round(res['F_reg'], 2)) + ' < F_crit(' + str(round(f_crit_reg, 2)) + ') -> NO SE RECHAZA H0.')
         print('   Conclusion: La regresion no es significativa.')
     else:
-        print('   F_calc =', round(res['F_reg'], 2), '> F_crit(' + str(round(f_crit_reg, 2)) + ') -> SE RECHAZA H0.')
+        print('   F_calc = ' + str(round(res['F_reg'], 2)) + ' > F_crit(' + str(round(f_crit_reg, 2)) + ') -> SE RECHAZA H0.')
 
     print('\n2. Media (Intercepto):')
     print('   H0: B0 = 0')
     if res['F_media'] > f_crit_media:
-        print('   F_calc =', round(res['F_media'], 2), '> F_crit(' + str(round(f_crit_media, 2)) + ') -> SE RECHAZA H0.')
+        print('   F_calc = ' + str(round(res['F_media'], 2)) + ' > F_crit(' + str(round(f_crit_media, 2)) + ') -> SE RECHAZA H0.')
         print('   Conclusion: La media/intercepto es dif. de cero.')
     else:
-        print('   F_calc =', round(res['F_media'], 2), '< F_crit(' + str(round(f_crit_media, 2)) + ') -> NO SE RECHAZA H0.')
+        print('   F_calc = ' + str(round(res['F_media'], 2)) + ' < F_crit(' + str(round(f_crit_media, 2)) + ') -> NO SE RECHAZA H0.')
 
 def imprimir_contribucion(res):
-    print('' + '='*50)
+    print('' + '=')
     print('--- B) CONTRIBUCION INDIVIDUAL (Pruebas t / F parciales) ---')
-    print('='*50)
+    print('=')
     print('Se prueba H0: Bj = 0 para cada variable en presencia de las demas.')
     f_crit_indiv = tabla_f.f_critico(1, res['gl_err'], 0.05)
     
@@ -113,11 +113,11 @@ def interactuar_hipotesis(res):
     sal = hipotesis.prueba(K, m_vec, res)
 
     print('\nRESULTADOS DE LA PRUEBA:')
-    print('Q =', round(sal['Q'], 4))
-    print('F_calc =', round(sal['F'], 4))
-    print('gl1 =', sal['gl1'], ' gl2 =', sal['gl2'])
+    print('Q = ' + str(round(sal['Q'], 4)))
+    print('F_calc = ' + str(round(sal['F'], 4)))
+    print('gl1 = ' + str(sal['gl1']) + ' gl2 = ' + str(sal['gl2']))
     fc_hip = tabla_f.f_critico(sal['gl1'], sal['gl2'], 0.05)
-    print('F_crit(.05) =', round(fc_hip, 4))
+    print('F_crit(.05) = ' + str(round(fc_hip, 4)))
     if sal['F'] > fc_hip:
         print('Conclusion: SE RECHAZA H0')
     else:
@@ -132,6 +132,10 @@ def calcular_prediccion(res):
         return
     partes = entrada.split(',')
     x0 = [float(p.strip()) for p in partes]
+    
+    if len(x0) != res["p"]:
+        print("Error: El vector x0 debe tener exactamente " + str(res["p"]) + " elementos.")
+        return
     
     # 1. Y_hat = x0^T * beta
     y_hat = sum([x0[i] * res["beta"][i] for i in range(len(x0))])
@@ -152,10 +156,10 @@ def calcular_prediccion(res):
     lim_inf = y_hat - t_crit * se_pred
     lim_sup = y_hat + t_crit * se_pred
     
-    print("\nResultados para x0 =", x0)
-    print("Y_hat (prediccion puntual):", round(y_hat, 4))
-    print("Varianza de la prediccion:", round(var_pred, 4))
-    print("Error Estandar (SE_pred):", round(se_pred, 4))
-    print("Valor t_critico (alfa/2=0.025):", round(t_crit, 4))
+    print("\nResultados para x0 = " + str(x0))
+    print("Y_hat (prediccion puntual): " + str(round(y_hat, 4)))
+    print("Varianza de la prediccion: " + str(round(var_pred, 4)))
+    print("Error Estandar (SE_pred): " + str(round(se_pred, 4)))
+    print("Valor t_critico (alfa/2=0.025): " + str(round(t_crit, 4)))
     print("Intervalo de Prediccion al 95%:")
-    print("(", round(lim_inf, 4), ",", round(lim_sup, 4), ")")
+    print("( " + str(round(lim_inf, 4)) + " , " + str(round(lim_sup, 4)) + " )")
