@@ -4,7 +4,8 @@
 def leer_lista(txt):
     r = []
     for p in txt.split(","):
-        r.append(float(p.strip()))
+        if p.strip() != "":
+            r.append(float(p.strip()))
     return r
 
 def leer_matriz(txt):
@@ -12,10 +13,14 @@ def leer_matriz(txt):
     M = []
     filas = txt.split(":")
     for f in filas:
+        if f.strip() == "":
+            continue
         fila = []
         for v in f.split(","):
-            fila.append(float(v.strip()))
-        M.append(fila)
+            if v.strip() != "":
+                fila.append(float(v.strip()))
+        if len(fila) > 0:
+            M.append(fila)
     return M
 
 def asegurar_matriz(X):
