@@ -29,6 +29,7 @@ def correlacion(V, i, j):
 
 def imprimir_var_cov(V, etiquetas):
     print("Matriz de Varianzas y Covarianzas de los estimadores:")
+    print("Formula: Var(Beta) = CME * (X'X)^-1")
     for i in range(len(V)):
         txt = ""
         for j in range(len(V)):
