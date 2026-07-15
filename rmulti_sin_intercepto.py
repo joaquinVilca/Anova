@@ -1,5 +1,5 @@
-# 2_rmultiple.py
-# MENU MAESTRO para Regresion Lineal Multiple (matrices de datos crudos).
+# rmulti_sin_intercepto.py
+# MENU MAESTRO para Regresion Lineal Multiple SIN INTERCEPTO (por el origen).
 # Reutiliza: matriz, inversa, modelo, anova, hipotesis, tabla_f, constructor
 
 import modelo as mod
@@ -11,7 +11,8 @@ import util_datos
 import modulo_anova
 import var_cov
 
-# ---- datos de ejemplo ----
+# ---- datos de ejemplo ---- 
+# Ojo: No incluimos columna de 1s en X_DEF porque el modelo no tiene intercepto.
 Y_dat = [40, 45, 50, 55, 60, 70, 65, 65, 75, 75, 80, 100, 90, 95, 85]
 X1_dat = [9, 8, 9, 8, 7, 6, 6, 8, 5, 5, 5, 3, 4, 3, 4]
 X2_dat = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
@@ -20,16 +21,37 @@ X4_dat = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
 TODAS_LAS_X = [X1_dat, X2_dat, X3_dat, X4_dat]
 
-
 def calcular_r2(res):
     SCR = res["SCR"]
     SCT = res["SCT"]
+    # Para modelos sin intercepto, el R2 "crudo" o sin centrar es:
     r2 = SCR / SCT
     r2a = 1.0 - (res["SCE"] / res["gl_err"]) / (SCT / res["gl_tot"])
     return r2, r2a
 
+def mostrar_teoria():
+    print("\n" + "="*40)
+    print(" TEORIA: REGRESION SIN INTERCEPTO")
+    print("="*40)
+    print("1. Modelo General: Y = X*B + e  (sin columna de 1s)")
+    print("   La linea o plano de regresion pasa obligatoriamente por el origen.")
+    print("\n2. Estimacion MCO:")
+    print("   B = (X'X)^-1 * X'Y")
+    print("\n3. Descomposicion de Varianza (No Centrada):")
+    print("   SCT (Total) = Y'Y  (No se resta n*(Y_bar)^2)")
+    print("   SCR (Regresion) = B'X'Y")
+    print("   SCE (Error) = Y'Y - B'X'Y")
+    print("\n4. Grados de Libertad:")
+    print("   gl(Total) = n")
+    print("   gl(Regresion) = p  (Numero de variables en X)")
+    print("   gl(Error) = n - p")
+    print("\n5. Coeficiente de Determinacion R^2:")
+    print("   R^2 = SCR / SCT (Basado en sumas de cuadrados no centradas)")
+    print("   R^2_adj = 1 - CME/CMT")
+    print("="*40 + "\n")
+
 def mostrar_anova_mlr(res):
-    print("--MODELO MLR--")
+    print("--MODELO MLR (SIN INTERCEPTO)--")
     F = anova.mostrar(res)
     r2, r2a = calcular_r2(res)
     print("R2=" + str(round(r2, 4)))
@@ -46,23 +68,18 @@ def mostrar_ecuaciones(X, y):
     p = len(X[0])
     
     if p == 1:
-        sum_x = sum(fila[0] for fila in X)
-        sum_y = sum(y)
         sum_x2 = sum(fila[0]**2 for fila in X)
         sum_xy = sum(X[i][0] * y[i] for i in range(n))
         
         print("-- SUMATORIAS --")
         print("n =", n)
-        print("sum X =", round(sum_x, 4))
-        print("sum Y =", round(sum_y, 4))
         print("sum X^2 =", round(sum_x2, 4))
         print("sum XY =", round(sum_xy, 4))
         
-        print("-- ECUACIONES NORMALES --")
-        print(str(n) + " b0 + " + str(round(sum_x, 4)) + " b1 = " + str(round(sum_y, 4)))
-        print(str(round(sum_x, 4)) + " b0 + " + str(round(sum_x2, 4)) + " b1 = " + str(round(sum_xy, 4)))
+        print("-- ECUACIONES NORMALES (Sin intercepto) --")
+        print(str(round(sum_x2, 4)) + " b1 = " + str(round(sum_xy, 4)))
     else:
-        print("-- SUMATORIAS MULTIPLES --")
+        print("-- SUMATORIAS MULTIPLES (Sin intercepto) --")
         sum_y = sum(y)
         print("n =", n)
         print("sum Y =", round(sum_y, 4))
@@ -71,6 +88,8 @@ def mostrar_ecuaciones(X, y):
             sum_xj2 = sum(fila[j]**2 for fila in X)
             sum_xjy = sum(X[i][j] * y[i] for i in range(n))
             print("X" + str(j+1) + ": sum X = " + str(round(sum_xj, 4)) + ", sum X^2 = " + str(round(sum_xj2, 4)) + ", sum XY = " + str(round(sum_xjy, 4)))
+            
+        print("\nEl sistema normal es X'X * B = X'Y")
 
 def menu_ecuaciones(X, y):
     while True:
@@ -98,7 +117,6 @@ def menu_analisis_extendido(res, X, y, et):
             modulo_anova.imprimir_contribucion(res)
         elif op == "3":
             modulo_anova.calcular_prediccion(res)
-
 
 def menu_hipotesis(res):
     while True:
@@ -131,28 +149,11 @@ def menu_hipotesis(res):
         else:
             print("NO se rechaza H0")
 
-def mostrar_teoria():
-    print("\n" + "="*40)
-    print(" TEORIA: REGRESION LINEAL MULTIPLE")
-    print("="*40)
-    print("1. Modelo General: Y = X*B + e")
-    print("   Y(nx1), X(nxp), B(px1), e(nx1)")
-    print("\n2. Estimacion MCO (Minimos Cuadrados Ordinarios):")
-    print("   B = (X'X)^-1 * X'Y")
-    print("\n3. Descomposicion de Varianza (ANOVA):")
-    print("   SCT (Total) = Y'Y - n*(Y_bar)^2")
-    print("   SCR (Regresion) = B'X'Y - n*(Y_bar)^2")
-    print("   SCE (Error) = Y'Y - B'X'Y")
-    print("\n4. Coeficiente de Determinacion R^2:")
-    print("   R^2 = SCR / SCT (Proporcion explicada)")
-    print("   R^2_adj = 1 - CME/CMT (Penaliza el exceso de variables)")
-    print("="*40 + "\n")
-
 def menu_principal():
     x_mem = []
     y_mem = []
     while True:
-        print("\n== REGRESION MLR ==")
+        print("\n== REGRESION MLR (SIN INTERCEPTO) ==")
         print("1. Ajustar modelo base (guiado)")
         print("2. Analisis completo automatico (Todo de frente)")
         print("3. Ver teoria")
@@ -181,8 +182,8 @@ def menu_principal():
         x_mem = X
         y_mem = y
         
-        # Ajustamos el modelo (el intercepto lo agrega modelo.py automaticamente)
-        res = mod.ajustar(X, y, con_intercepto=True)
+        # Ajustamos el modelo (SIN intercepto)
+        res = mod.ajustar(X, y, con_intercepto=False)
         et = constructor.etiquetas_mlr(res)
         
         print("\nBETA:")

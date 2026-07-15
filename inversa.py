@@ -32,6 +32,8 @@ def invertir(A):
                     I[col], I[f] = I[f], I[col]
                     piv = M[col][col]
                     break
+        if abs(piv) < 1e-12:
+            raise ValueError("Colinealidad exacta detectada. La matriz no se puede invertir.")
         for j in range(n):
             M[col][j] = M[col][j] / piv
             I[col][j] = I[col][j] / piv

@@ -118,6 +118,22 @@ def menu_hipotesis(res):
             print("NO se rechaza H0")
 
 # ---- menu principal ----
+def mostrar_teoria():
+    print("\n" + "="*40)
+    print(" TEORIA: REGRESION POLINOMIAL")
+    print("="*40)
+    print("1. Modelo: Y = B0 + B1*X + B2*X^2 + ... + Bk*X^k + e")
+    print("   Trata potencias de X como variables multiples.")
+    print("\n2. Matriz de Diseno (Vandermonde):")
+    print("   Filas de la forma [1, xi, xi^2, ..., xi^k].")
+    print("\n3. Suma de Cuadrados Secuencial (Extra SS):")
+    print("   Mide la contribucion marginal de anadir el termino X^k.")
+    print("   SS(X^k | X, ... X^(k-1)) = SCE(k-1) - SCE(k)")
+    print("\n4. Prueba de Hipotesis:")
+    print("   H0: Bk = 0 vs H1: Bk != 0")
+    print("   Si H0 no se rechaza, el grado optimo es k-1 o menor.")
+    print("="*40 + "\n")
+
 def menu_principal():
     x_mem = []
     y_mem = []
@@ -126,10 +142,14 @@ def menu_principal():
         print("1.Ajustar modelo")
         print("2.SS secuencial")
         print("3.Ambos")
-        print("4.Salir")
+        print("4.Ver teoria")
+        print("5.Salir")
         op = input(">")
-        if op == "4":
+        if op == "5":
             break
+        if op == "4":
+            mostrar_teoria()
+            continue
         if op not in ["1", "2", "3"]:
             continue
 

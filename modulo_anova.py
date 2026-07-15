@@ -1,6 +1,7 @@
 import matriz
 import inversa
 import tabla_f
+import tabla_t
 import constructor
 import hipotesis
 
@@ -91,13 +92,16 @@ def imprimir_contribucion(res):
     print('Se prueba H0: Bj = 0 para cada variable en presencia de las demas.')
     f_crit_indiv = tabla_f.f_critico(1, res['gl_err'], 0.05)
     
-    for i in range(1, res['p']):
+    CME = res.get('CME', res['SCE'] / res['gl_err'])
+    start_idx = 1 if res.get('con_intercepto', True) else 0
+    et = constructor.etiquetas_mlr(res)
+    for i in range(start_idx, res['p']):
         C_ii = res['XtX_inv'][i][i]
-        var_beta = res['CME'] * C_ii
+        var_beta = CME * C_ii
         se_beta = var_beta ** 0.5
         t_calc = res['beta'][i] / se_beta
         F_calc = t_calc ** 2
-        print('Variable X' + str(i) + ' (B' + str(i) + ' = ' + str(round(res['beta'][i], 4)) + '):')
+        print('Variable ' + et[i] + ' (' + et[i] + ' = ' + str(round(res['beta'][i], 4)) + '):')
         print('   SE(Bj) = ' + str(round(se_beta, 4)) + ', t_calc = ' + str(round(t_calc, 4)) + ', F_calc = ' + str(round(F_calc, 4)))
         if F_calc > f_crit_indiv:
             print('   -> SIGNIFICATIVA (F_calc > ' + str(round(f_crit_indiv, 2)) + '). Rechaza H0.')
@@ -145,7 +149,8 @@ def calcular_prediccion(res):
     h00 = matriz.dot(x0, M_x0)
     
     # 3. Varianza de la prediccion (observacion nueva)
-    var_pred = res["CME"] * (1 + h00)
+    CME = res.get('CME', res['SCE'] / res['gl_err'])
+    var_pred = CME * (1 + h00)
     se_pred = var_pred ** 0.5
     
     # 4. t critico
@@ -163,3 +168,32 @@ def calcular_prediccion(res):
     print("Valor t_critico (alfa/2=0.025): " + str(round(t_crit, 4)))
     print("Intervalo de Prediccion al 95%:")
     print("( " + str(round(lim_inf, 4)) + " , " + str(round(lim_sup, 4)) + " )")
+
+def imprimir_intervalos_confianza(res, alpha=0.05):
+    print("\n" + "="*50)
+    print("--- INTERVALOS DE CONFIANZA PARA LOS COEFICIENTES (" + str(round((1-alpha)*100)) + "%) ---")
+    print("="*50)
+    
+    t_crit = tabla_t.t_critico(res["gl_err"], alpha)
+    print("t_critico (alfa/2=" + str(alpha/2) + ", gl=" + str(res['gl_err']) + ") = " + str(round(t_crit, 4)))
+    print("Formula general: B_i +- t_critico * EE(B_i)")
+    print("Donde EE(B_i) = Raiz( CME * elemento_diagonal_(X^TX)^-1 )\n")
+    
+    CME = res.get('CME', res['SCE'] / res['gl_err'])
+    et = constructor.etiquetas_mlr(res)
+    
+    for i in range(res['p']):
+        C_ii = res['XtX_inv'][i][i]
+        var_beta = CME * C_ii
+        se_beta = var_beta ** 0.5
+        margen_error = t_crit * se_beta
+        
+        lim_inf = res['beta'][i] - margen_error
+        lim_sup = res['beta'][i] + margen_error
+        
+        pct_confianza = round((1-alpha)*100)
+        print(et[i].upper() + " = " + str(round(res['beta'][i], 4)))
+        print("   EE(" + et[i].upper() + ") = Raiz(" + str(round(CME, 4)) + " * " + str(round(C_ii, 4)) + ") = " + str(round(se_beta, 4)))
+        print("   IC " + str(pct_confianza) + "%: " + str(round(res['beta'][i], 4)) + " +- (" + str(round(t_crit, 4)) + " * " + str(round(se_beta, 4)) + ")")
+        print("   Rango Neto: [ " + str(round(lim_inf, 4)) + " ; " + str(round(lim_sup, 4)) + " ]\n")
+

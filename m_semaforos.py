@@ -21,7 +21,7 @@ import modelo
 import modulo_anova
 import hipotesis
 import tabla_f
-import datos_semaforos as datos
+import d_semaforos as datos
 
 
 def parte_a():

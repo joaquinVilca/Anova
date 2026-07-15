@@ -80,3 +80,27 @@ def construir(resultado, tipo="mlr"):
     for r in range(q):
         print(" " + texto_restriccion(K[r], et, m[r]))
     return K, m
+
+def construir_ceros(resultado, tipo="mlr"):
+    et = mostrar_coeficientes(resultado, tipo)
+    p = len(et)
+    print("Indices (1-" + str(p) + ") a igualar a 0, sep por comas:")
+    indices = input("> ")
+    idx_list = []
+    for x in indices.split(","):
+        if x.strip() != "":
+            idx_list.append(int(x.strip()) - 1)
+            
+    q = len(idx_list)
+    K = []
+    m = []
+    for idx in idx_list:
+        fila = [0.0] * p
+        fila[idx] = 1.0
+        K.append(fila)
+        m.append(0.0)
+    
+    print("H0:")
+    for r in range(q):
+        print(" " + texto_restriccion(K[r], et, m[r]))
+    return K, m
